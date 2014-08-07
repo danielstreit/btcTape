@@ -1,11 +1,19 @@
 var port = process.env.PORT || 3000;
-var io = require('socket.io').listen(port);
-var bitstamp = require('./listeners/bitstamp.js');
-bitstamp.on('trade', handleTrade);
+var express = require('express');
+var app = express();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+var logger = require('morgan');
+var bitstamp = require('./listeners/bitstamp');
 
+app.use(logger('dev'));
+app.use(express.static(__dirname + '/public'));
+
+bitstamp.on('trade', handleTrade);
 function handleTrade(trade) {
-  console.log(trade);
   io.sockets.emit('trade', trade);
 }
 
-console.log('socket.io listening on port', port);
+server.listen(port, function() {
+  console.log('listening on port', port);
+});

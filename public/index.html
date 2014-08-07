@@ -1,0 +1,13 @@
+<html>
+  <script src="https://cdn.socket.io/socket.io-1.0.6.js"></script>
+  <script>
+    var socket = io.connect('http://localhost');
+    socket.on('connect', function() {
+      console.log('hello');
+    });
+    socket.on('trade', function(trade) {
+      console.log(trade);
+    });
+
+  </script>
+</html>
