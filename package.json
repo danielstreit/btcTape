@@ -1,0 +1,12 @@
+{
+  "name": "BTC-QuoteServer",
+  "version": "0.0.0",
+  "description": "Socket.io streaming bitcoin quote server",
+  "main": "app.js",
+  "author": "Daniel Streit",
+  "license": "MIT",
+  "dependencies": {
+    "socket.io": "^1.0.6",
+    "pusher-client": "^0.2.2"
+  }
+}
