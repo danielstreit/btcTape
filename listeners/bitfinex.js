@@ -1,6 +1,6 @@
 /*
 * This module periodically requests trade data from Bitfinex,
-* standardizes the trade data, and sends a trade object to the callback function.
+* standardizes the trade data, and emits a trade event.
 */
 var exchange = 'Bitfinex';
 var request = require('request');
@@ -33,5 +33,4 @@ setInterval(function() {
 	});
 
 }, period);
-
 module.exports = bitfinex;
