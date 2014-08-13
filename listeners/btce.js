@@ -15,19 +15,23 @@ setInterval(function() {
 	request(url, function(err, res, body) {
 		if (err) return err;
 		// Filter out old trades
-		var rawTrades = JSON.parse(body).reverse().filter(function(trade) {
-			return trade.tid > lastID && trade.date*1000 > dateNow;
-		});
-		for (var i = 0; i < rawTrades.length; i++) {
-			rawTrades[i].tid > lastID && (lastID = rawTrades[i].tid);
-			var trade = {
-				exchange: exchange,
-				date: rawTrades[i].date * 1000,
-				price: rawTrades[i].price,
-				amount: rawTrades[i].amount,
-				exchangeTradeID: rawTrades[i].tid
-			};
-			btce.emit('trade', trade);
+		try {
+			var rawTrades = JSON.parse(body).reverse().filter(function(trade) {
+				return trade.tid > lastID && trade.date*1000 > dateNow;
+			});
+			for (var i = 0; i < rawTrades.length; i++) {
+				rawTrades[i].tid > lastID && (lastID = rawTrades[i].tid);
+				var trade = {
+					exchange: exchange,
+					date: rawTrades[i].date * 1000,
+					price: rawTrades[i].price,
+					amount: rawTrades[i].amount,
+					exchangeTradeID: rawTrades[i].tid
+				};
+				btce.emit('trade', trade);
+			}
+		} catch (error) {
+			console.error(error);
 		}
 	});
 }, period);
