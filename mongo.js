@@ -1,5 +1,5 @@
 var mongoose = require('mongoose');
-mongoose.connect(process.env.MONGOHQ_URL);
+mongoose.connect(process.env.CUSTOMCONNSTR_MONGOHQ_URI);
 var db = mongoose.connection;
 var tradeSchema = new mongoose.Schema({
   exchange: String,
