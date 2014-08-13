@@ -4,6 +4,7 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var logger = require('morgan');
+var mongo = require('./mongo');
 var bitstamp = require('./listeners/bitstamp');
 var bitfinex = require('./listeners/bitfinex');
 var hitbtc = require('./listeners/hitbtc');
@@ -20,6 +21,7 @@ btce.on('trade', handleTrade);
 anxbtc.on('trade', handleTrade);
 function handleTrade(trade) {
   io.sockets.emit('trade', trade);
+  mongo.saveTrade(trade);
 }
 
 server.listen(port, function() {
