@@ -24,7 +24,6 @@ setInterval(function() {
 				exchange: exchange,
 				date: rawTrades[i].date * 1000,
 				price: rawTrades[i].price,
-				priceCurrency: 'USD',
 				amount: rawTrades[i].amount,
 				exchangeTradeID: rawTrades[i].tid
 			};

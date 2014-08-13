@@ -9,7 +9,6 @@ listener.on('trade', function (data) {
     exchange: exchange,
     date: Date.now(),
     price: data.price,
-    priceCurrency: 'USD',
     amount: data.amount,
     exchangeTradeID: Date.now()
   };
