@@ -20,10 +20,21 @@ db.once('open', function() {
 
 var mongo = {};
 mongo.saveTrade = function(trade) {
-  var t = new Trade(trade);
-  t.save(function(error, t) {
-    if (error) console.error(error);
-  });
+  // Dont save trades while developing...should probably be done with process.env...
+  // var t = new Trade(trade);
+  // t.save(function(error, t) {
+  //   if (error) console.error(error);
+  // });
+};
+
+mongo.getTrades = function(min, callback) {
+  min = min || 0;
+  callback = callback || function() {};
+  Trade.find()
+      .where('amount').gt(min)
+      .limit(20)
+      .sort('-date')
+      .exec(callback);
 };
 
 module.exports = mongo;

@@ -30,6 +30,11 @@ body {
   border-top: 1px solid #e5e5e5;
 }
 
+.tradeFilter {
+  padding-bottom: 10px;
+  text-align: center;
+}
+
 /* Customize container */
 @media (min-width: 768px) {
   .container {
@@ -38,6 +43,11 @@ body {
 }
 .container-narrow > hr {
   margin: 30px 0;
+}
+
+.tradeFilter {
+  max-width: 50%;
+  margin: auto;
 }
 
 /* Responsive: Portrait tablets and up */

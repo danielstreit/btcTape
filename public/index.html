@@ -36,8 +36,13 @@
         <h1 class="text-muted">btcTape</h1>
       </div>
       <div class="tradeContainer">
+        <div class="input-group tradeFilter">
+          <span class="input-group-addon">Filter Trades:</span>
+          <input type="number" class="form-control tradeSizeFilter" min="0" step="1" value="0" name="tradeSizeFilter">
+          <span class="input-group-addon">BTC</span>
+        </div>
         <table class="table">
-          <tr class='headerRow'><th>Time</th><th>Price</th><th>Quantity</th><th>Exchange</th></tr>
+          <tr class='headerRow'><th>Time</th><th>Price</th><th>Quantity</th><th>USD Value</th><th>Exchange</th></tr>
         </table>
       </div>
       <div class="footer">
