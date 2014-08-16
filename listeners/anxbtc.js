@@ -14,20 +14,23 @@ var anxbtc = new EventEmitter();
 setInterval(function() {
 	url = baseurl + lastTimestamp;
 	request(url, function(err, res, body) {
-		if (err) return err;
-		var rawTrades = JSON.parse(body).data;
-		for (var i = 0; i < rawTrades.length; i++) {
-			if (rawTrades[i].tid >= lastTimestamp) {
-				lastTimestamp = rawTrades[i].tid + 1;
+		try {
+			var rawTrades = JSON.parse(body).data;
+			for (var i = 0; i < rawTrades.length; i++) {
+				if (rawTrades[i].tid >= lastTimestamp) {
+					lastTimestamp = rawTrades[i].tid + 1;
+				}
+				var trade = {
+					exchange: exchange,
+					date: rawTrades[i].tid,
+					price: rawTrades[i].price,
+					amount: rawTrades[i].amount,
+					exchangeTradeID: rawTrades[i].tid
+				};
+				anxbtc.emit('trade', trade);
 			}
-			var trade = {
-				exchange: exchange,
-				date: rawTrades[i].tid,
-				price: rawTrades[i].price,
-				amount: rawTrades[i].amount,
-				exchangeTradeID: rawTrades[i].tid
-			};
-			anxbtc.emit('trade', trade);
+		} catch (error) {
+			console.error('Error retrieving anx data (probably invalid JSON): ' + error);
 		}
 	});
 

@@ -13,7 +13,6 @@ var btce = new EventEmitter();
 
 setInterval(function() {
 	request(url, function(err, res, body) {
-		if (err) return err;
 		// Filter out old trades
 		try {
 			var rawTrades = JSON.parse(body).reverse().filter(function(trade) {
@@ -31,7 +30,7 @@ setInterval(function() {
 				btce.emit('trade', trade);
 			}
 		} catch (error) {
-			console.error(error);
+			console.error('Error retrieving btce data (probably invalid JSON): ' + error);
 		}
 	});
 }, period);
