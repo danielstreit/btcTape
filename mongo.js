@@ -20,11 +20,10 @@ db.once('open', function() {
 
 var mongo = {};
 mongo.saveTrade = function(trade) {
-  // Dont save trades while developing...should probably be done with process.env...
-  // var t = new Trade(trade);
-  // t.save(function(error, t) {
-  //   if (error) console.error(error);
-  // });
+  var t = new Trade(trade);
+  t.save(function(error, t) {
+    if (error) console.error(error);
+  });
 };
 
 mongo.getTrades = function(min, callback) {
