@@ -10,6 +10,7 @@ var minTrade = 0;
 
 var chartsReady = false;
 var priceDistChart;
+var rawPriceDistData;
 var priceDistData;
 var priceDistOptions = {
     hAxis: { title: 'Price' },
@@ -17,14 +18,6 @@ var priceDistOptions = {
     theme: 'maximized',
     isStacked: true
 };
-// var priceDistOptions = {
-//     legend: { position: 'in', maxLines: 3 },
-//     chartArea: { width: '100%', height: '100%' },
-//     hAxis: { title: 'Price', textPosition: 'in' },
-//     vAxis: { title: 'Quantity', textPosition: 'in' },
-//     axisTitlesPosition: 'in',
-//     isStacked: true,
-// };
 
 var formatTrade = function(trade) {
   var fTrade = {};
@@ -65,6 +58,7 @@ var addTrade = function(trade) {
 socket.on('connect', function() {
   console.log('hello');
   socket.emit('getTrades', minTrade);
+  socket.emit('getPriceDistData');
 });
 
 socket.on('arrayOfTrades', function(trades) {
@@ -77,10 +71,9 @@ socket.on('trade', function(trade) {
 });
 
 socket.on('priceDistData', function(data) {
-  data = processPriceDistData(data);
+  rawPriceDistData = processPriceDistData(data);
   if (chartsReady) {
-    priceDistData = google.visualization.arrayToDataTable(data);
-    priceDistChart.draw(priceDistData, priceDistOptions);
+    drawPriceDistChart();
   }
 });
 
@@ -89,12 +82,18 @@ google.setOnLoadCallback(function() {
     .visualization
     .ColumnChart(document.getElementById('priceDistChart'));
   chartsReady = true;
+  if (rawPriceDistData) drawPriceDistChart();
 });
 
 $tradeSizeFilter.change(function() {
   minTrade = $tradeSizeFilter.val();
   socket.emit('getTrades', minTrade);
 });
+
+var drawPriceDistChart = function() {
+  priceDistData = google.visualization.arrayToDataTable(rawPriceDistData);
+  priceDistChart.draw(priceDistData, priceDistOptions);
+}
 
 var processPriceDistData = function(data) {
   var exchanges = ['Exchanges'];

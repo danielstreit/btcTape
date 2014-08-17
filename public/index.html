@@ -37,23 +37,17 @@
       <div class="header">
         <h1 class="text-muted">btcTape</h1>
       </div>
-      <div class="priceDistHeader clearfix">
-        <span class="sectionHeader pull-left text-muted">Price Distribution</span>
-        <span class="input-group pull-right">
-          <select class="form-control">
-            <option value="hour">One Hour</option>
-            <option value="day">One Day</option>
-            <option value="week">One Week</option>
-          </select>
-        </span>
+      <div class="header clearfix">
+        <h3 class="text-muted">Price Distribution<small> Last 24 Hours</small></h3>
       </div>
       <div id="priceDistChart">
 
       </div>
       <hr>
-      <div class="tradeHeader">
-        <span class="sectionHeader pull-left text-muted">Recent Trades</span>
-        <span class="input-group tradeFilter pull-right">
+      <div class="">
+        <h3 class="text-muted col-sm-6 noPadding">Recent Trades</h3>
+        <span class="col-sm-2"></span>
+        <span class="input-group tradeFilter col-sm-4">
           <span class="input-group-addon">Filter:</span>
           <input type="number" class="form-control tradeSizeFilter" min="0" step="1" value="0" name="tradeSizeFilter">
           <span class="input-group-addon">BTC</span>

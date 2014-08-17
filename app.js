@@ -1,5 +1,4 @@
 var port = process.env.PORT || 3000;
-var _ = require('underscore');
 var express = require('express');
 var app = express();
 var server = require('http').Server(app);
@@ -10,10 +9,9 @@ var bitfinex = require('./listeners/bitfinex');
 var hitbtc = require('./listeners/hitbtc');
 var btce = require('./listeners/btce');
 var anxbtc = require('./listeners/anxbtc');
-
-var hourPriceDist = [];
-var dayPriceDist = [];
-var weekPriceDist = [];
+var priceDist;
+var priceDistTimeframe = 1000*60*60*24;
+var priceDistUpdateFrequency = 60*1000;
 
 app.use(express.static(__dirname + '/public'));
 
@@ -31,26 +29,28 @@ io.on('connection', function(socket) {
       socket.emit('arrayOfTrades', trades);
     });
   });
+  socket.on('getPriceDistData', function() {
+    socket.emit('priceDistData', priceDist);
+  });
 });
 
 function handleTrade(trade) {
   io.sockets.emit('trade', trade);
   mongo.saveTrade(trade);
-}
-
-var startPriceDistLoop = function(timeframe, dataCache, period) {
-  mongo.getPriceDist(timeframe, function(error, data) {
-    if (error) console.error(error);
-    else dataCache = data;
-    io.sockets.emit('priceDistData', dataCache);
-    setTimeout(function() {
-      startPriceDistLoop(timeframe, dataCache, period);
-    }, period)
-  });
 };
 
-startPriceDistLoop(60*60*1000, hourPriceDist, 30*1000);
-
+var priceDistLoop = function() {
+  mongo.getPriceDist(priceDistTimeframe, function(error, data) {
+    if (error) {
+      console.error(error);
+    } else {
+      priceDist = data;
+      io.sockets.emit('priceDistData', data);
+    }
+    setTimeout(priceDistLoop, priceDistUpdateFrequency);
+  });
+};
+priceDistLoop();
 
 server.listen(port, function() {
   console.log('listening on port', port);
@@ -58,4 +58,3 @@ server.listen(port, function() {
 
 // TODO:
 // are bitfinex trades being emitted in the correct order?
-// bitfinex and btce adding duplicate trades
