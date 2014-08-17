@@ -36,4 +36,14 @@ mongo.getTrades = function(min, callback) {
       .exec(callback);
 };
 
+mongo.getPriceDist = function(timeframe, callback) {
+  var since = new Date(Date.now() - timeframe);
+  var match = { $match : { date : { $gt : since }}};
+  var project = { $project : { amount : 1, exchange : 1, price : { $subtract : ["$price", { $mod : ["$price", 1] } ] } } };
+  var group = { $group : { _id : { exchange: "$exchange", price: "$price" }, volume : { $sum : "$amount" } }};
+  var unwind = { $project : { exchange : "$_id.exchange", price: "$_id.price", volume: 1, _id: 0} };
+  var sort = { $sort : { exchange: 1, price: 1 } }
+  Trade.aggregate(match, project, group, unwind, sort).exec(callback);
+};
+
 module.exports = mongo;

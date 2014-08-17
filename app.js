@@ -1,4 +1,5 @@
 var port = process.env.PORT || 3000;
+var _ = require('underscore');
 var express = require('express');
 var app = express();
 var server = require('http').Server(app);
@@ -9,6 +10,10 @@ var bitfinex = require('./listeners/bitfinex');
 var hitbtc = require('./listeners/hitbtc');
 var btce = require('./listeners/btce');
 var anxbtc = require('./listeners/anxbtc');
+
+var hourPriceDist = [];
+var dayPriceDist = [];
+var weekPriceDist = [];
 
 app.use(express.static(__dirname + '/public'));
 
@@ -33,9 +38,24 @@ function handleTrade(trade) {
   mongo.saveTrade(trade);
 }
 
+var startPriceDistLoop = function(timeframe, dataCache, period) {
+  mongo.getPriceDist(timeframe, function(error, data) {
+    if (error) console.error(error);
+    else dataCache = data;
+    io.sockets.emit('priceDistData', dataCache);
+    setTimeout(function() {
+      startPriceDistLoop(timeframe, dataCache, period);
+    }, period)
+  });
+};
+
+startPriceDistLoop(60*60*1000, hourPriceDist, 30*1000);
+
+
 server.listen(port, function() {
   console.log('listening on port', port);
 });
 
 // TODO:
 // are bitfinex trades being emitted in the correct order?
+// bitfinex and btce adding duplicate trades
