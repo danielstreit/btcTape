@@ -34,6 +34,10 @@ body {
   padding: 0;
 }
 
+.page-header {
+  margin: 5px 0 5px;
+}
+
 @media (min-width: 768px) {
   .container {
     max-width: 730px;
