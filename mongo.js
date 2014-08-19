@@ -26,6 +26,7 @@ mongo.saveTrade = function(trade) {
   });
 };
 
+// Fetch trades greater than min (defaults to 0);
 mongo.getTrades = function(min, callback) {
   min = min || 0;
   callback = callback || function() {};
@@ -36,10 +37,68 @@ mongo.getTrades = function(min, callback) {
       .exec(callback);
 };
 
+// Fetch high, low, volume, and number of trades (numTrades)
+mongo.getBasicMarketData = function(timeframe, callback) {
+  var since = new Date(Date.now() - timeframe);
+  var pipe = [];
+
+  // Select trades since given date
+  pipe.push({
+    $match : { date : { $gt : since } }
+  });
+
+  // Summary statistics
+  pipe.push({
+    $group: {
+      _id: null,
+      high: { $max: "$price" },
+      low: { $min: "$price" },
+      numTrades: { $sum: 1 },
+      volume: { $sum: "$amount" }
+    }
+  });
+  Trade.aggregate(pipe).exec(callback);
+}
+
+// Fetch volume weighted average price (VWAP)
+mongo.getVWAP = function(timeframe, callback) {
+  var since = new Date(Date.now() - timeframe);
+  var pipe = [];
+
+  // Select trades since given date
+  pipe.push({
+    $match : { date : { $gt : since } }
+  });
+
+  // Muliply price and quantity for each trade and sum accross
+  // all trades in the set
+  pipe.push({
+    _id: null,
+    pqSum: { $sum: { $multiply: ["$price", "$amount"] } },
+    volume: { $sum: "$amount" }
+  });
+
+  // Divide by volume to get VWAP
+  pipe.push({
+    $project: {
+      _id: 0,
+      vwap: { $divide: ["$pqSum", "$volume"] }
+    }
+  });
+  Trade.aggregate(pipe).exec(callback);
+}
+
+// Fetch the standard deviation (my measure of volatility)
+mongo.getVolatility = function(timeframe, callback) {
+
+}
+
+// Fetch data to build price distribution chart
 mongo.getPriceDist = function(timeframe, callback) {
   var since = new Date(Date.now() - timeframe);
   var pipe = [];
-  // Select trades timeframe since now
+
+  // Select trades since given date
   pipe.push({ 
     $match : { date : { $gt : since } }
   });
