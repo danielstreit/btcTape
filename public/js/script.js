@@ -3,6 +3,12 @@ var socket = io.connect();
 var template = _.template('<tr class="trade"><td><%=hours%>:<%=minutes%>:<%=seconds%></td><td><%=price%></td><td><%=amount%></td><td><%=usd%></td><td><%=exchange%></td></tr>');
 var $headerRow = $('tr.headerRow:first');
 var $tradeSizeFilter = $('input.tradeSizeFilter');
+var $high = $('span.high');
+var $low = $('span.low');
+var $vwap = $('span.vwap');
+var $volume = $('span.volume');
+var $volatility = $('span.volatility');
+var $numTrades = $('span.numTrades');
 var digits = 2; // Number of digits for formatting price and ammount
 var tradeCount = 0;
 var maxTrades = 20;
@@ -58,7 +64,7 @@ var addTrade = function(trade) {
 socket.on('connect', function() {
   console.log('hello');
   socket.emit('getTrades', minTrade);
-  socket.emit('getPriceDistData');
+  socket.emit('init');
 });
 
 socket.on('arrayOfTrades', function(trades) {
@@ -68,6 +74,15 @@ socket.on('arrayOfTrades', function(trades) {
 
 socket.on('trade', function(trade) {
   addTrade(trade);
+});
+
+socket.on('summaryData', function(data) {
+  $high.text(data.high.toFixed(digits));
+  $low.text(data.low.toFixed(digits));
+  $vwap.text(data.vwap.toFixed(digits));
+  $volume.text(data.volume.toFixed(digits));
+  $numTrades.text(data.numTrades);
+  $volatility.text(data.volatility.toFixed(digits));
 });
 
 socket.on('priceDistData', function(data) {

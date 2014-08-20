@@ -3,15 +3,18 @@ var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
+var _ = require('underscore');
 var mongo = require('./mongo');
 var bitstamp = require('./listeners/bitstamp');
 var bitfinex = require('./listeners/bitfinex');
 var hitbtc = require('./listeners/hitbtc');
 var btce = require('./listeners/btce');
 var anxbtc = require('./listeners/anxbtc');
-var priceDist;
 var priceDistTimeframe = 1000*60*60*24;
 var priceDistUpdateFrequency = 60*1000;
+var day = 1000*60*60*24;
+var priceDist;
+var summaryData = {};
 
 app.use(express.static(__dirname + '/public'));
 
@@ -29,7 +32,8 @@ io.on('connection', function(socket) {
       socket.emit('arrayOfTrades', trades);
     });
   });
-  socket.on('getPriceDistData', function() {
+  socket.on('init', function() {
+    socket.emit('summaryData', summaryData);
     socket.emit('priceDistData', priceDist);
   });
 });
@@ -38,6 +42,20 @@ function handleTrade(trade) {
   io.sockets.emit('trade', trade);
   mongo.saveTrade(trade);
 };
+
+var summaryDataLoop = function() {
+  mongo.getSummaryData(day, function(error, data) {
+    if (error) {
+      console.log(error);
+    } else {
+      _.extend(summaryData, data[0]);
+      summaryData.volatility = Math.sqrt(data[0].variance);
+      io.sockets.emit('summaryData', summaryData);
+    }
+    setTimeout(summaryDataLoop, 30*1000);
+  });
+}
+summaryDataLoop();
 
 var priceDistLoop = function() {
   mongo.getPriceDist(priceDistTimeframe, function(error, data) {
@@ -55,6 +73,3 @@ priceDistLoop();
 server.listen(port, function() {
   console.log('listening on port', port);
 });
-
-// TODO:
-// are bitfinex trades being emitted in the correct order?

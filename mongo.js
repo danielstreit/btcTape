@@ -38,58 +38,82 @@ mongo.getTrades = function(min, callback) {
 };
 
 // Fetch high, low, volume, and number of trades (numTrades)
-mongo.getBasicMarketData = function(timeframe, callback) {
+mongo.getSummaryData = function(timeframe, callback) {
   var since = new Date(Date.now() - timeframe);
   var pipe = [];
 
   // Select trades since given date
-  pipe.push({
+  pipe.push({ 
     $match : { date : { $gt : since } }
   });
 
-  // Summary statistics
   pipe.push({
     $group: {
       _id: null,
       high: { $max: "$price" },
       low: { $min: "$price" },
+      pq: { $sum: { $multiply: ["$price", "$amount"] } },
+      volume: { $sum: "$amount" },
       numTrades: { $sum: 1 },
-      volume: { $sum: "$amount" }
+      trades: { $push: { price: "$price", amount: "$amount" } }
     }
   });
-  Trade.aggregate(pipe).exec(callback);
-}
 
-// Fetch volume weighted average price (VWAP)
-mongo.getVWAP = function(timeframe, callback) {
-  var since = new Date(Date.now() - timeframe);
-  var pipe = [];
-
-  // Select trades since given date
   pipe.push({
-    $match : { date : { $gt : since } }
+    $project: {
+      vwap: { $divide: [ "$pq", "$volume" ] },
+      high: 1,
+      low: 1,
+      volume: 1,
+      numTrades: 1,
+      trades: 1
+    }
   });
 
-  // Muliply price and quantity for each trade and sum accross
-  // all trades in the set
+  pipe.push({ $unwind: "$trades" });
+
   pipe.push({
-    _id: null,
-    pqSum: { $sum: { $multiply: ["$price", "$amount"] } },
-    volume: { $sum: "$amount" }
+    $project: {
+      high: 1,
+      low: 1,
+      vwap: 1,
+      volume: 1,
+      numTrades: 1,
+      trades: 1,
+      weightedSquaredError: {
+        $multiply: [
+          { $subtract: ["$trades.price", "$vwap"]},
+          { $subtract: ["$trades.price", "$vwap"]},
+          "$trades.amount"
+        ]
+      }
+    }
   });
 
-  // Divide by volume to get VWAP
+  pipe.push({
+    $group: {
+      _id: null,
+      high: { $first: "$high" },
+      low: { $first: "$low" },
+      vwap: { $first: "$vwap" },
+      volume: { $first: "$volume" },
+      numTrades: { $first: "$numTrades" },
+      sumSquares: { $sum: "$weightedSquaredError" }
+    }
+  });
+
   pipe.push({
     $project: {
       _id: 0,
-      vwap: { $divide: ["$pqSum", "$volume"] }
+      high: 1,
+      low: 1,
+      vwap: 1,
+      volume: 1,
+      numTrades: 1,
+      variance: { $divide: ["$sumSquares", "$volume"]}
     }
   });
   Trade.aggregate(pipe).exec(callback);
-}
-
-// Fetch the standard deviation (my measure of volatility)
-mongo.getVolatility = function(timeframe, callback) {
 
 }
 
