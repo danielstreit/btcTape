@@ -9,7 +9,6 @@ var bitstamp = require('./listeners/bitstamp');
 var bitfinex = require('./listeners/bitfinex');
 var hitbtc = require('./listeners/hitbtc');
 var btce = require('./listeners/btce');
-var anxbtc = require('./listeners/anxbtc');
 var priceDistTimeframe = 1000*60*60*24;
 var priceDistUpdateFrequency = 60*1000;
 var day = 1000*60*60*24;
@@ -22,7 +21,6 @@ bitstamp.on('trade', handleTrade);
 bitfinex.on('trade', handleTrade);
 hitbtc.on('trade', handleTrade);
 btce.on('trade', handleTrade);
-anxbtc.on('trade', handleTrade);
 
 io.on('connection', function(socket) {
   socket.on('getTrades', function(min) {
@@ -40,7 +38,7 @@ io.on('connection', function(socket) {
 
 function handleTrade(trade) {
   io.sockets.emit('trade', trade);
-  mongo.saveTrade(trade);
+  if (process.env.NODE_ENV === 'production') mongo.saveTrade(trade);
 };
 
 var summaryDataLoop = function() {
