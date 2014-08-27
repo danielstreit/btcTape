@@ -4,6 +4,8 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var _ = require('underscore');
+var CronJob = require('cron').CronJob;
+var build = require('./cron/build.js');
 var mongo = require('./mongo');
 var bitstamp = require('./listeners/bitstamp');
 var bitfinex = require('./listeners/bitfinex');
@@ -67,6 +69,16 @@ var priceDistLoop = function() {
   });
 };
 priceDistLoop();
+
+// Set up a cron job to compute summary data to be saved in
+// computedValues table
+// Should be triggered at 00:30 UTC every day.
+var hour = 24 - new Date().getTimezoneOffset()/60;
+var job = new CronJob({
+  cronTime: '00 30 '+ hour + ' * * *',
+  onTick: build,
+  start: true
+});
 
 server.listen(port, function() {
   console.log('listening on port', port);

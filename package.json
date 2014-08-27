@@ -6,7 +6,9 @@
   "author": "Daniel Streit",
   "license": "MIT",
   "dependencies": {
+    "cron": "^1.0.4",
     "express": "^4.8.2",
+    "mongodb": "^1.4.9",
     "mongoose": "^3.8.14",
     "morgan": "^1.2.2",
     "pusher-client": "^0.2.2",
