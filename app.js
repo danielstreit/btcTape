@@ -1,4 +1,5 @@
 var port = process.env.PORT || 3000;
+var url = process.env.URL || 'localhost';
 var express = require('express');
 var app = express();
 var server = require('http').Server(app);
@@ -80,6 +81,6 @@ var job = new CronJob({
   start: true
 });
 
-server.listen(port, function() {
+server.listen(port, url, function() {
   console.log('listening on port', port);
 });
